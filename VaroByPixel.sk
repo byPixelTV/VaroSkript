@@ -1,0 +1,156 @@
+options:
+	p: &a&lVaro &7|
+command /addteam <player> <player> <text> <number>:
+	permission: varo.admin
+	permission message: &cDafür hast du keine Rechte!
+	trigger:
+		if arg-1, arg-2, arg-3 and arg 4 is set:
+			if {varo.teams::*} contains arg-3:
+				send "{@p} &cDer Name des Teams ist bereits in verwendung!"
+				if {varo.teams.ids::*} contains arg-4:
+					send "{@p} &cDie ID des Teams ist bereits in verwendung!"
+			else:
+				add arg 1's uuid and arg 2's uuid to {varoteam.%arg-4%.%arg-3%::team}
+				add arg 3 to {varo.teams::*}
+				add arg 4 to {varo.teams.ids::*}
+				send "{@p} &aDie Spieler &e%arg-1% &aund &e%arg-2% &asind das &e%arg-4%te &aTeam namens &e%arg-3%&a!"
+				send "{@p} &aDu bist jetzt mit &e%arg-2% &aim Team ihr habt die ID &e%arg-4%&a!" to arg 1
+				send "{@p} &aDu bist jetzt mit &e%arg-1% &aim Team ihr habt die ID &e%arg-4%&a!" to arg 2
+command /listteams:
+	trigger:
+		send "&bAlle existierenden Teams: &a%{varo.teams::*}%" and "&bAlle ID's der existierenden Teams: &a%{varo.teams.ids::*}%"
+command /remteam <text> <number>:
+	trigger:
+		if arg-1 and arg-2 is set:
+			if {varo.teams::*} contains arg-1:
+				remove arg-1 from {varo.teams::*}
+				if {varo.teams.ids::*} contains arg-2:
+					remove arg-2 from {varo.teams.ids::*}
+					send "{@p} &cDas Team mit der ID &e%arg-2% &cmit dem Namen &e%arg-1% &cwurde gelöscht!"
+			else:
+				send "{@p} &cDieses Team existiert nicht oder du hast etwas falsch eingegeben!"
+command /varo <text>:
+	permission: varo.admin
+	permission message: &cDafür hast du keine Rechte!
+	usage: {@p} &5Skript coded by &bbyPixelTV: &7/varo help
+	trigger:
+		if arg 1 is "start":
+			set {varo.start} to true
+			teleport all players to {varo.spawn}
+			send "{@p} &a&lDas Varo hat begonnen und die Border ist bei &e&l10000 &a&lBlöcken!" to all players
+			make console execute "/worldborder set 10000"
+			set gamemode of all players to survival
+			clear inventory of all players
+			add all players to {varo.alive::%uuid of all players%}
+			set {varo.started} to true
+		if arg 1 is "stop":
+			delete {varo.started}
+			delete {varo.teams.ids::*}
+			delete {varo.start}
+			delete {varo.timer}
+			delete {varo.death.%uuid of all players%}
+			delete {varo.pixel.death.%uuid of all players%} 
+			delete {varo.teams::*}
+			delete {varo.alive.list.%uuid of player%}
+			delete {varoalive::*}
+			delete {varo.pvp}
+			send "{@p} &c&lDas Varo wurde gestoppt! Und die Worldborder ist nun wieder auf &e&l10000 &c&lBlöcke gesetzt!" to all players
+			set gamemode of all players to spectator
+			make console execute "/worldborder set 10000"
+		if arg 1 is "help":
+			send "{@p} &b/varo start", "{@p} &b/varo stop" and "{@p} &b/addteam <player> <player> <Name des Teams> <ID>" and "{@p} &b/remteam /remteam <Name des Teams> <ID>"
+		if arg 1 is not "help", "start" or "stop":
+			send "{@p} &5Skript coded by &bbyPixelTV: &7/varo help"
+every second:
+	if {varo.start} is set:
+		add 1 to {varo.timer}
+	if {varo.timer} is 600:
+		send "{@p} &e&lDie Border wurde auf 7000 Blöcke gesetzt! In 10 Minuten wird sie auf 5000 Blöcke gesetzt!" to all players
+		make console execute "/worldborder set 7000"
+	if {varo.timer} is 1600:
+		send "{@p} &e&lDie Border wurde auf 5000 Blöcke gesetzt! In 5 Minuten wird sie auf 4500 gesetzt!" to all players
+		make console execute "/worldborder set 5000"
+	if {varo.timer} is 1900:
+		set {varo.pvp} to true
+		send "{@p} &e&lDie Border wurde auf 4500 Blöcke gesetzt! In 5 Minuten wird sie auf 4000 gesetzt!" to all players
+		send "{@p} &4&lPvP ist jetzt &a&laktiviert!" to all players
+		give 10 of bread to all players
+		make console execute "/worldborder set 4500"
+	if {varo.timer} is 2100:
+		send "{@p} &e&lDie Border wurde auf 4000 Blöcke gesetzt! In 5 Minuten wird sie auf 3500 gesetzt!" to all players
+		make console execute "/worldborder set 4000"
+	if {varo.timer} is 2400:
+		send "{@p} &e&lDie Border wurde auf 3500 Blöcke gesetzt! In 5 Minuten wird sie auf 3000 gesetzt!" to all players
+		make console execute "/worldborder set 3500"
+	if {varo.timer} is 2700:
+		send "{@p} &e&lDie Border wurde auf 3000 Blöcke gesetzt! In 5 Minuten wird sie auf 2500 gesetzt!" to all players
+		make console execute "/worldborder set 3000"
+	if {varo.timer} is 3000:
+		send "{@p} &e&lDie Border wurde auf 2500 Blöcke gesetzt! In 5 Minuten wird sie auf 1000 gesetzt!" to all players
+		make console execute "/worldborder set 2500"
+	if {varo.timer} is 3300:
+		send "{@p} &e&lDie Border wurde auf 1000 Blöcke gesetzt! In 5 Minuten wird sie auf 500 gesetzt!" to all players
+		make console execute "/worldborder set 1000"
+	if {varo.timer} is 3600:
+		send "{@p} &e&lDie Border wurde auf 500 Blöcke gesetzt! In 5 Minuten wird sie auf 300 gesetzt!" to all players
+		make console execute "/worldborder set 500"
+	if {varo.timer} is 3900:
+		send "{@p} &e&lDie Border wurde auf 300 Blöcke gesetzt! In 5 Minuten wird sie auf 250 gesetzt!" to all players
+		make console execute "/worldborder set 300"
+	if {varo.timer} is 4100:
+		send "{@p} &e&lDie Border wurde auf 250 Blöcke gesetzt! Dies war die letze veränderung!" to all players
+		make console execute "/worldborder set 250"
+on death:
+	if victim is a player:
+		set {varo.death.%uuid of player%} to true
+		set gamemode of victim to spectator
+		send "{@p} &a%victim% ist jetzt ein Zuschauer!" to all players
+		teleport victim to {varo.spawn}
+		remove victim from {varo.alive::%uuid of player%}
+command /setspawn [<text>]:
+	permission: varo.admin
+	permission message: {@p} &cDafür hast du keine Rechte!
+	trigger:
+		if arg 1 is "varostart":
+			set {varo.spawn} to location of player
+			send "{@p} &aDu hast denn Spawnpoint gesetzt!"
+		if arg 1 is "fj":
+			set {varo.spawn.fja} to location of player
+			send "{@p} &aDu hast denn FJA-Spawnpoint gesetzt!"
+		if arg 1 is "help":
+			send "&f&l---> &aMit &b/setspawn varostart &asetzt du den Spawn bei dem jeder zum Start des Tuniers teleportiert werden soll!" and "&f&l---> &aMit &b/setspawn fj &asetzt du den Spawn bei dem man spawnen soll wenn man den Server betritt!"
+command /alert <text>:
+	permission: varo.admin
+	permission message: {@p} &cDafür hast du keine Rechte!
+	trigger:
+		broadcast "&f&l[&4&lAlert&f&l] &b&l%arg-1%"
+command /alive:
+	trigger:
+		loop all players:
+			if {varo.death.%uuid of player%} is not set:
+				send "{@p} &bSpieler die am Leben sind: &a%{varoalive::*}%" to player
+on damage:
+	if attacker is a player:
+		if victim is a player:
+			if {varo.pvp} is not set:
+				cancel event
+every second:
+	loop all players:
+		if {varo.death.%uuid of loop-player%} is not set:
+			if {varo.alive.list.%uuid of loop-player%} is not set:
+				set {varo.alive.list.%uuid of loop-player%} to true
+				add loop-player to {varoalive::*}
+		else:
+			remove loop-player from {varoalive::*}
+			set {varo.alive.list.%uuid of loop-player%} to true
+on join:
+	if {varo.started} is not set:
+		set join message to "&f[&2+&f] &b%player% &aist jetzt auf dem Server!"
+		teleport player to {varo.spawn.fja}
+	else:
+		set join message to ""
+		teleport player to {varo.spawn.fja}
+		set gamemode of player to spectator
+command /help:
+	trigger:
+		send "&5&lThis skript was made by &b&lbyPixelTV&5&l! &7(&6https://github.com/byPixelTV)"
